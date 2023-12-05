@@ -1,0 +1,7 @@
+release
+.env
+*.db
+*.log
+test/*.db
+test/*.log
+*exe

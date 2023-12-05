@@ -1,0 +1,8 @@
+[mysqld]
+server-id		 = 1
+#log_bin	     = /var/log/mysql/mysql-bin.log
+log_bin			 = /var/log/mariadb/mariadb-bin.log
+expire_logs_days = 10
+max_binlog_size  = 100M
+binlog-format    = row #Row based replication
+binlog-do-db     = sipp
