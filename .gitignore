@@ -3,5 +3,7 @@ release
 *.db
 *.log
 test/*.db
+test/*.db-journal
 test/*.log
 *exe
+*.db-journal
