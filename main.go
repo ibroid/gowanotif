@@ -44,6 +44,9 @@ func main() {
 		RunWAOnly()
 	case "auth":
 		RunWaAuth()
+	case "schedule":
+		events.StartCronEvent()
+		return
 	default:
 		RunMain()
 	}

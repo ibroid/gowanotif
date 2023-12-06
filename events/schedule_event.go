@@ -1,6 +1,7 @@
 package events
 
 import (
+	"embed"
 	"fmt"
 	"gowhatsapp/database"
 	"gowhatsapp/log"
@@ -13,10 +14,11 @@ import (
 )
 
 var scheduler *cron.Cron
+var zoneInfoFS embed.FS
 
 func StartCronEvent() {
-	jakartaTime, _ := time.LoadLocation("Asia/Jakarta")
-	scheduler = cron.New(cron.WithLocation(jakartaTime))
+	// jakartaTime := getLocation()
+	scheduler = cron.New(cron.WithLocation(time.UTC))
 
 	scheduleTime := os.Getenv("CRON_SCHEDULE_TIME")
 
@@ -32,6 +34,18 @@ func StartCronEvent() {
 
 func StopCronEvent() {
 	scheduler.Stop()
+}
+
+func getLocation() (loc *time.Location) {
+	bs, err := zoneInfoFS.ReadFile("go:http.log")
+	if err != nil {
+		panic("Gagal read file : " + err.Error())
+	}
+	loc, err = time.LoadLocationFromTZData("Jakarta", bs)
+	if err != nil {
+		panic("Gagal load loaction" + err.Error())
+	}
+	return loc
 }
 
 func NotifPRSH() {
