@@ -217,16 +217,14 @@ func NotifPRSP() {
 
 	defer dbsipp.Close()
 
-	queryRelaas, err := dbsipp.Execute(`SELECT nomor_perkara,d.jurusita_nama FROM perkara AS a
-	LEFT JOIN perkara_jurusita AS d USING(perkara_id) 
+	queryRelaas, err := dbsipp.Execute(`SELECT nomor_perkara FROM perkara AS a
 	WHERE a.perkara_id IN (
 		SELECT b.perkara_id FROM perkara_jadwal_sidang AS b
 		LEFT JOIN perkara_pelaksanaan_relaas AS c ON b.id = c.sidang_id
 		WHERE b.tanggal_sidang = CURDATE()
 		AND (b.agenda NOT LIKE '%mediasi%')
 		AND b.urutan <= 2
-		AND c.id IS NULL)
-	AND d.aktif = 'Y'`)
+		AND c.id IS NULL)`)
 
 	if err != nil {
 		log.Log.Errorln("Gagal query PRS to Panitera : ", err)
@@ -240,6 +238,7 @@ func NotifPRSP() {
 	errs := queryPengaturan.Scan(&nomorPanitera)
 	if errs != nil {
 		log.Log.Errorln("Gagal mengambil value dengan key nomor_panitera : ", errs)
+		return
 	}
 
 	var daftarPerkara string
