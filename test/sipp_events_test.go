@@ -234,7 +234,7 @@ func TestNotifPAC(t *testing.T) {
 
 		time.Sleep(5 * time.Second)
 
-		events.NotifPAC([]interface{}{"25418", "2023", "1626", "1626/AC/2023/PA.JU", "2023-08-28", "J 023719", "Cerai Gugat", "9", 1, 1, 1, nil, nil, "resources/file/doc/2023/06/PAJU_2023_PdtG_1462_aktacerai_1693282515.pdf", 1, nil, nil, "C10", "2023-08-10 01:34:17", "meja3gugatan", "2023-08-28 10:37:14"})
+		events.NotifPAC([]interface{}{"25418", "2023", "1626", "1626/AC/2023/PA.JU", "2023-08-28", "J 023719", "Cerai Gugat", "9", 1, 1, 1, nil, nil, "resources/file/doc/2023/06/PAJU_2023_PdtG_1462_aktacerai_1693282515.pdf", 1, nil, nil, "C10", "2023-08-10 01:34:17", "meja3gugatan", "2023-08-28 10:37:14"}, []interface{}{})
 		wg.Done()
 	}()
 
@@ -317,4 +317,18 @@ func TestNotifWithContext(t *testing.T) {
 
 	fmt.Println("sampe sini")
 	ctx.Done()
+}
+
+func TestTanggalTerbibtAcEqualToday(t *testing.T) {
+	timeTerbit, errParse := time.Parse("2006-01-02", "2023-01-09")
+	if errParse != nil {
+		panic(errParse)
+
+	}
+
+	if !time.Now().Equal(timeTerbit) {
+		panic("Tanggal Terbit Not Equal")
+	}
+
+	fmt.Println("Sukses. Lanjutkan")
 }

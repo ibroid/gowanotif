@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-mysql-org/go-mysql/canal"
 )
@@ -75,7 +76,7 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 	case "perkara_akta_cerai":
 		if e.Action == "update" {
 			log.Log.Infoln("Update event perkara_akta_cerai. ID :", e.Rows[0][0], " .Notif to Pihak")
-			NotifPAC(e.Rows[1])
+			NotifPAC(e.Rows[1], e.Rows[0])
 		}
 
 	case "perkara_pihak1":
@@ -462,10 +463,26 @@ func NotifSPV(rowData []interface{}) error {
 	return nil
 }
 
-func NotifPAC(rowData []interface{}) error {
-	if rowData[3] == nil || rowData[4] == nil {
+func NotifPAC(rowData []interface{}, rowOldData []interface{}) error {
+	if rowData[3] == nil && rowData[4] == nil {
 		log.Log.Warningln("Skip PAC. Data data masih nil")
 		return errors.New("nomor dan tanggal ac masih nil. skip")
+	}
+
+	if rowOldData[3] != nil && rowOldData[4] == nil {
+		log.Log.Warningln("Skip PAC. Duplikasi edit data")
+		return errors.New("aksi terduplikasi")
+	}
+
+	timeTerbit, errParse := time.Parse("2006-01-02", rowData[4].(string))
+	if errParse != nil {
+		log.Log.Errorln("Gagal parsing tanggal terbit : ", errParse)
+		return errParse
+	}
+
+	if !time.Now().Equal(timeTerbit) {
+		log.Log.Warningln("Skip PAC : Tanggal terbit bukan hari ini")
+		return errors.New("skip Notif PAC. Tanggal terbit tidak sesuai hari ini")
 	}
 
 	var (

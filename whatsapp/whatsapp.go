@@ -147,7 +147,7 @@ func SetEvenHandler(client string) {
 		switch v := evt.(type) {
 		case *events.Message:
 			log.Log.Debugln("Event handler trigered")
-			if !v.Info.MessageSource.IsFromMe && !v.Info.Sender.IsEmpty() && v.Message.GetConversation() != "" {
+			if !v.Info.MessageSource.IsFromMe && !v.Info.Sender.IsEmpty() && v.Message.GetConversation() != "" && !v.Info.IsGroup {
 				log.Log.Println("Pesan Baru :", v.Message.GetConversation(), ". Dari : ", v.Info.Sender.User)
 
 				var wg sync.WaitGroup
