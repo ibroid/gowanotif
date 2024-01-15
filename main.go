@@ -32,24 +32,9 @@ func init() {
 
 func main() {
 	log.LogInit()
+	database.InitDBLocal()
 
-	flag.Parse()
-
-	switch Do {
-	case "event_only":
-		RunSippEventOnly()
-	case "api_only":
-		RunApiOnly()
-	case "wa_only":
-		RunWAOnly()
-	case "auth":
-		RunWaAuth()
-	case "schedule":
-		events.StartCronEvent()
-		return
-	default:
-		RunMain()
-	}
+	server.StartServer()
 }
 
 func RunMain() {

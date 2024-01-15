@@ -40,6 +40,11 @@ type WAMessageRequest struct {
 	Client string `json:"client"`
 }
 
+func init() {
+	*store.DeviceProps.Os = *proto.String("Windows")
+	*store.DeviceProps.PlatformType = *waProto.DeviceProps_CHROME.Enum()
+}
+
 func RunEngine() error {
 	if os.Getenv("SINGLE_WA") == "0" {
 		if os.Getenv("INTERNAL_WA_NUMBER") == "" || os.Getenv("PUBLIC_WA_NUMBER") == "" {
@@ -55,9 +60,6 @@ func RunEngine() error {
 		if devices, err = container.GetAllDevices(); err != nil {
 			return err
 		}
-
-		*store.DeviceProps.Os = *proto.String("Windows")
-		*store.DeviceProps.PlatformType = *waProto.DeviceProps_CHROME.Enum()
 
 		if len(devices) == 2 {
 			for _, d := range devices {
@@ -105,17 +107,17 @@ func CheckClient(client string) bool {
 	return WAClients[client] == nil
 }
 
-func setDevice(client string, number string) *store.Device {
+func setDevice(client string, number string) (*store.Device, error) {
 	container := setContainer(client)
 
 	if client == "dummy" || client == "default" {
 		device, err := container.GetFirstDevice()
 
 		if err != nil {
-			log.Log.Fatalln("Gagal get first device :", err)
+			return nil, errors.New("Gagal get first device: " + err.Error())
 		}
 
-		return device
+		return device, nil
 	}
 
 	jid, _ := ParseJid(number)
@@ -126,12 +128,12 @@ func setDevice(client string, number string) *store.Device {
 	}
 
 	if oldDevice != nil {
-		return oldDevice
+		return oldDevice, nil
 	}
 
 	device := container.NewDevice()
 
-	return device
+	return device, nil
 }
 
 func setContainer(client string) *sqlstore.Container {
@@ -190,7 +192,8 @@ func ReadMessage(client string, msg types.MessageInfo, wg *sync.WaitGroup) {
 
 func AppendDevice(client string, number string, handler bool) {
 	// WALogs[client] = waLog.Stdout("Client", "DEBUG", true)
-	WAClients[client] = whatsmeow.NewClient(setDevice(client, number), nil)
+	device, _ := setDevice(client, number)
+	WAClients[client] = whatsmeow.NewClient(device, nil)
 	*store.DeviceProps.Os = *proto.String("Windows")
 	*store.DeviceProps.PlatformType = *waProto.DeviceProps_CHROME.Enum()
 	if handler {

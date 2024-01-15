@@ -14,7 +14,7 @@ func RegisterWaRoute(app *fiber.App) {
 	waRouter := app.Group("/wa")
 
 	waRouter.Post("/start", func(c *fiber.Ctx) error {
-		postReq := &utils.WaClient{}
+		postReq := &wa.WAStartRequest{}
 
 		if err := c.BodyParser(postReq); err != nil {
 			return errors.New("Gagal parsing :" + err.Error())
@@ -28,9 +28,47 @@ func RegisterWaRoute(app *fiber.App) {
 			})
 		}
 
-		// IMPLEMENT SSTART AUTHED WHATSAPP
+		wa.StartAuthedWClient(*postReq)
 
-		return c.JSON(&fiber.Map{})
+		return c.JSON(&fiber.Map{
+			"status":  true,
+			"message": "Wa client berhasil dijalankan",
+			"data": &fiber.Map{
+				"JID":  wa.WAClients[postReq.ClientName].Store.ID.User,
+				"Name": wa.WAClients[postReq.ClientName].Store.PushName,
+			},
+		})
+	})
+
+	waRouter.Post("/auth", func(c *fiber.Ctx) error {
+		postReq := &wa.WAAuthRequest{}
+
+		if err := c.BodyParser(postReq); err != nil {
+			return errors.New("Gagal parsing :" + err.Error())
+		}
+
+		errs := utils.Validate(*postReq)
+		if len(errs) != 0 {
+			return c.Status(400).JSON(&fiber.Map{
+				"message": "Validation Error",
+				"field":   errs,
+			})
+		}
+
+		if postReq.Handler {
+			wa.SetEvenHandler(postReq.ClientName)
+		}
+
+		wa.ClientAuthentication(*postReq, nil)
+
+		return c.JSON(&fiber.Map{
+			"status":  true,
+			"message": "Wa client berhasil dijalankan",
+			"data": &fiber.Map{
+				"JID":  wa.WAClients[postReq.ClientName].Store.ID.User,
+				"Name": wa.WAClients[postReq.ClientName].Store.PushName,
+			},
+		})
 	})
 
 	waRouter.Post("/send_message", func(c *fiber.Ctx) error {
@@ -72,7 +110,6 @@ func RegisterWaRoute(app *fiber.App) {
 	})
 
 	waRouter.Post("/stop", func(c *fiber.Ctx) error {
-
 		postRequest := &utils.WaClient{}
 
 		if err := c.BodyParser(postRequest); err != nil {
@@ -85,7 +122,7 @@ func RegisterWaRoute(app *fiber.App) {
 		}
 
 		if wa.CheckClient(postRequest.ClientName) {
-			wa.StopWa(postRequest.ClientName)
+			wa.ClientDisconnect(postRequest.ClientName)
 
 		} else {
 			return c.Status(400).JSON(&fiber.Map{
