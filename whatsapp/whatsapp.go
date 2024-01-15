@@ -34,6 +34,12 @@ type WAResponse struct {
 	Qr      string `json:"qr"`
 }
 
+type WAMessageRequest struct {
+	Text   string `json:"text"`
+	Dest   string `json:"dest"`
+	Client string `json:"client"`
+}
+
 func RunEngine() error {
 	if os.Getenv("SINGLE_WA") == "0" {
 		if os.Getenv("INTERNAL_WA_NUMBER") == "" || os.Getenv("PUBLIC_WA_NUMBER") == "" {
@@ -93,6 +99,10 @@ func RunEngine() error {
 	}
 
 	return nil
+}
+
+func CheckClient(client string) bool {
+	return WAClients[client] == nil
 }
 
 func setDevice(client string, number string) *store.Device {

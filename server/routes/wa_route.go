@@ -4,7 +4,7 @@ import (
 	"errors"
 	"gowhatsapp/log"
 	"gowhatsapp/server/utils"
-	"gowhatsapp/whatsapp"
+	wa "gowhatsapp/whatsapp"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -28,16 +28,7 @@ func RegisterWaRoute(app *fiber.App) {
 			})
 		}
 
-		cwaresp := make(chan *whatsapp.WAResponse)
-
-		if CheckClient(postReq.ClientName) {
-			go whatsapp.StartWa(postReq.ClientName, cwaresp)
-		} else {
-			return c.Status(400).JSON(&fiber.Map{
-				"message": "Wa Client sudah berjalan",
-				"status":  false,
-			})
-		}
+		// IMPLEMENT SSTART AUTHED WHATSAPP
 
 		return c.JSON(&fiber.Map{})
 	})
@@ -55,19 +46,19 @@ func RegisterWaRoute(app *fiber.App) {
 			log.Log.Panicln("Gagal validasi : ", errors)
 		}
 
-		if CheckClient(postRequest.ClientName) {
+		if wa.CheckClient(postRequest.ClientName) {
 			return c.Status(400).JSON(&fiber.Map{
 				"message": "Wa Client tidak berjalan",
 				"status":  false,
 			})
 
 		} else {
-			dest, err := whatsapp.ParseJid(postRequest.Number)
+			dest, err := wa.ParseJid(postRequest.Number)
 			if err != nil {
 				log.Log.Panicln("Gagal parsing JID : ", errors)
 			}
 
-			err = whatsapp.SendMessage(postRequest.ClientName, dest, postRequest.Message)
+			err = wa.SendMessage(postRequest.ClientName, dest, postRequest.Message)
 			if err != nil {
 				log.Log.Panicln("Gagal send message : ", errors)
 			}
@@ -93,8 +84,8 @@ func RegisterWaRoute(app *fiber.App) {
 			log.Log.Panicln(errors)
 		}
 
-		if CheckClient(postRequest.ClientName) {
-			whatsapp.StopWa(postRequest.ClientName)
+		if wa.CheckClient(postRequest.ClientName) {
+			wa.StopWa(postRequest.ClientName)
 
 		} else {
 			return c.Status(400).JSON(&fiber.Map{
@@ -108,8 +99,4 @@ func RegisterWaRoute(app *fiber.App) {
 			"message": "Whatsapp Berhasil Dihentikan",
 		})
 	})
-}
-
-func CheckClient(client string) bool {
-	return whatsapp.WAClients[client] == nil
 }
