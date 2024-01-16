@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gowhatsapp/database"
+	"gowhatsapp/database/data"
 	"gowhatsapp/log"
 	"os"
 	"strings"
@@ -359,4 +361,29 @@ func StartWaDummy(wg *sync.WaitGroup) {
 	// c := make(chan os.Signal, 1)
 	// signal.Notify(c, os.Interrupt, syscall.SIGINT)
 	// <-c
+}
+
+func GetInternalClient(service string) ([]*whatsmeow.Client, error) {
+	dblocal := database.StartDBLocal()
+	defer dblocal.Close()
+
+	queryGetActiveClient, err := dblocal.Query("SELECT * FROM client WHERE status = 1 AND service = ?", service)
+	if err != nil {
+		return nil, err
+	}
+	defer queryGetActiveClient.Close()
+
+	var clients []*whatsmeow.Client
+	for queryGetActiveClient.Next() {
+		client := new(data.Clients)
+		err = queryGetActiveClient.Scan(&client.ClientName, &client.Jid, &client.Handler, &client.Status, &client.Service)
+
+		if err != nil {
+			return nil, err
+		}
+
+		clients = append(clients, WAClients[client.ClientName])
+	}
+
+	return clients, nil
 }

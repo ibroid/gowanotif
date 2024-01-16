@@ -66,6 +66,7 @@ func StartServer() {
 	routes.RegisterWaRoute(Http)
 	routes.RegisterPengaturanRoute(Http)
 	routes.RegisterNotifikasiRoute(Http)
+	routes.RegisterClientsRoute(Http)
 
 	Http.Listen("0.0.0.0:8099")
 }

@@ -30,6 +30,9 @@ func CreateAllTable(db *sql.DB) {
 
 		// CREATE NOREPLY
 		`CREATE TABLE IF NOT EXISTS template_reply (id INTEGER PRIMARY KEY AUTOINCREMENT, pesan TEXT, trigger TEXT);`,
+
+		// CREATE NOREPLY
+		`CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY AUTOINCREMENT, client_name TEXT, jid TEXT, handler INTEGER, status INTEGER, service TEXT);`,
 	}
 
 	for no, query := range queryList {
