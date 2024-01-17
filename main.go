@@ -2,8 +2,8 @@ package main
 
 import (
 	"gowhatsapp/database"
+	"gowhatsapp/events"
 	"gowhatsapp/log"
-	wa "gowhatsapp/whatsapp"
 
 	"github.com/joho/godotenv"
 )
@@ -16,5 +16,5 @@ func main() {
 	log.LogInit()
 	database.InitDBLocal()
 
-	wa.InitializeThirdParty()
+	events.StartSippEvent()
 }
