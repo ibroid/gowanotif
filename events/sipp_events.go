@@ -704,21 +704,3 @@ func StatusRelaas(id string) string {
 
 	return "Tidak Dapat Dilaksanakan"
 }
-
-func SendNotifMessage(client string, number string, message string) error {
-
-	destination, err := whatsapp.ParseJid(number)
-	if err != nil {
-		return err
-	}
-
-	if os.Getenv("SINGLE_WA") == "1" {
-		client = "default"
-	}
-
-	if err := whatsapp.SendMessage(client, destination, message); err != nil {
-		return err
-	}
-
-	return nil
-}
