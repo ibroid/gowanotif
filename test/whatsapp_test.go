@@ -160,3 +160,10 @@ func TestConvertJID(t *testing.T) {
 	}
 	fmt.Println(parsed)
 }
+
+func TestStartSessionWARestApi(t *testing.T) {
+	// Happy path
+	client := "testClient"
+	whatsapp.StartSessionWARestApi(client)
+
+}
